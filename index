@@ -325,6 +325,20 @@ p{line-height:1.55}
  .hx-act{grid-area:act;align-self:center}
  .hx-keys{display:none}
 }
+
+.cta-modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(62,75,70,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.cta-modal.open{display:flex;animation:ctaFade .25s ease both}
+@keyframes ctaFade{from{opacity:0}to{opacity:1}}
+.cta-card{position:relative;width:min(400px,100%);margin-top:50px;background:var(--paper);border:4px solid var(--pink-pale);border-radius:30px;padding:66px 22px 20px;text-align:center;box-shadow:0 18px 40px rgba(62,75,70,.3);animation:ctaPop .4s cubic-bezier(.2,1.4,.5,1) both}
+@keyframes ctaPop{from{transform:translateY(18px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.cta-pipin{position:absolute;left:50%;top:-58px;width:104px;height:auto;transform:translateX(-50%);filter:drop-shadow(0 6px 6px #3554482b)}
+.cta-eyebrow{font-size:13px;letter-spacing:1.3px;text-transform:uppercase;font-weight:900;color:var(--mint-deep);margin-bottom:6px}
+.cta-card h2{font-size:clamp(25px,6.5vw,31px);line-height:1.1;margin:0 0 10px}
+.cta-card h2 span{color:var(--pink-deep)}
+.cta-card p{font-size:16px;margin:0 0 18px;color:var(--ink)}
+.cta-actions{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.cta-actions .primary-cta{display:block;text-decoration:none;text-align:center;font-size:17px}
+.cta-actions .text-link{align-self:center}
 </style>
 </head>
 <body>
@@ -659,6 +673,18 @@ p{line-height:1.55}
   </div>
  </div>
 </section>
+</div>
+<div class="cta-modal" id="ctaModal" role="dialog" aria-modal="true" aria-labelledby="ctaTitle" hidden>
+ <div class="cta-card">
+  <img class="cta-pipin" id="ctaPipin" alt="Pipin">
+  <div class="cta-eyebrow" id="ctaEyebrow">Dari kniaWorld</div>
+  <h2 id="ctaTitle">Mau bikin game seperti ini?</h2>
+  <p id="ctaText">Kamu juga bisa bikin game edukasi sendiri.</p>
+  <div class="cta-actions">
+   <a class="primary-cta" id="ctaGo" href="https://lynk.id/kniaconnect/m67pg7ynm9e1" target="_blank" rel="noopener noreferrer">Mau bikin 🚀</a>
+   <button type="button" class="text-link" id="ctaLater">Nanti saja</button>
+  </div>
+ </div>
 </div>
 <script>
 (() => {
@@ -1172,11 +1198,30 @@ p{line-height:1.55}
      if(i<=stars)setTimeout(()=>el.classList.add('lit'),i*260);
    }
    confetti();
+   window.setTimeout(()=>{if(!$('resultScreen').hidden)showCTA('end');},1800);
  }
  $('quizChange').addEventListener('click',()=>showScreen('menuScreen'));
  $('hiddenChange').addEventListener('click',()=>showScreen('menuScreen'));
  $('playAgain').addEventListener('click',()=>activeMode==='quiz'?startQuiz():startHidden());
  $('chooseAgain').addEventListener('click',()=>showScreen('menuScreen'));
+
+ // ===== CTA pop up: muncul di awal dan akhir permainan =====
+ const CTA_COPY={
+  start:{pose:'f1',eyebrow:'Sebelum mulai',title:'Mau bikin game <span>seperti ini</span>?',text:'Game kata ini dibuat dengan bantuan AI. Kamu juga bisa bikin game edukasi buat anak sendiri, tanpa ribet!'},
+  end:{pose:'f6',eyebrow:'Seru, kan?',title:'Yuk bikin <span>game sendiri</span>!',text:'Habis main, mau bikin game edukasi seperti ini untuk anakmu? Mulai dari sini, ya!'}
+ };
+ const cta=$('ctaModal');let ctaPrevFocus=null;
+ function showCTA(kind){
+   const c=CTA_COPY[kind];if(!c||cta.classList.contains('open'))return;
+   $('ctaPipin').src=U(SPR.pipin[c.pose]);$('ctaEyebrow').textContent=c.eyebrow;$('ctaTitle').innerHTML=c.title;$('ctaText').textContent=c.text;
+   ctaPrevFocus=document.activeElement;cta.hidden=false;cta.classList.add('open');
+ }
+ function hideCTA(){cta.classList.remove('open');cta.hidden=true;try{ctaPrevFocus&&ctaPrevFocus.focus&&ctaPrevFocus.focus({preventScroll:true});}catch(e){}}
+ $('ctaLater').addEventListener('click',hideCTA);
+ $('ctaGo').addEventListener('click',()=>window.setTimeout(hideCTA,150));
+ cta.addEventListener('click',e=>{if(e.target===cta)hideCTA();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cta.classList.contains('open'))hideCTA();},true);
+ window.setTimeout(()=>showCTA('start'),900);
 })();
 </script>
 </body>
